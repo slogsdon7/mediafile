@@ -1465,6 +1465,9 @@ class MediaFile(object):
     """Represents a multimedia file on disk and provides access to its
     metadata.
     """
+
+    _fields = None
+
     def __init__(self, path, id3v23=False):
         """Constructs a new `MediaFile` reflecting the file at path. May
         throw `UnreadableFileError`.
@@ -1472,8 +1475,10 @@ class MediaFile(object):
         By default, MP3 files are saved with ID3v2.4 tags. You can use
         the older ID3v2.3 standard by specifying the `id3v23` option.
         """
-        from field_map import fields
-        self.set_fields(fields)
+        if self._fields is None:
+            from field_map import fields
+            self.set_fields(fields)
+
         self.path = path
 
         self.mgfile = mutagen_call('open', path, mutagen.File, path)
@@ -1614,6 +1619,7 @@ class MediaFile(object):
 
     @classmethod
     def set_fields(cls, fields):
+        cls._fields = fields
         for name, descriptor in fields.items():
             setattr(cls, name, descriptor)
 
